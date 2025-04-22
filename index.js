@@ -29,6 +29,18 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
+
+
+
+        app.post('/movie', async (req, res) => {
+            const newMovie = req.body;
+            console.log(newMovie);
+
+        })
+
+
+
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -38,7 +50,6 @@ async function run() {
     }
 }
 run().catch(console.dir);
-
 
 
 
