@@ -7,7 +7,7 @@ const port = process.env.PORT || 5000;
 
 
 //middleware;
-app.use((cors));
+app.use(cors());
 app.use(express.json());
 
 
@@ -30,12 +30,15 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+        const movieCollection = client.db('movieDB').collection('movie');
 
 
         app.post('/movie', async (req, res) => {
             const newMovie = req.body;
             console.log(newMovie);
 
+            const result = await movieCollection.insertOne(newMovie);
+            res.send(result);
         })
 
 
@@ -55,10 +58,10 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Movie portal server is running')
-})
+    res.send('Movie portal server is running');
+});
 
 
 app.listen(port, () => {
-    console.log(`Movie portal is running port: ${port}`)
-})
+    console.log(`Movie portal is running on port: ${port}`);
+});
