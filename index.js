@@ -30,6 +30,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
 
+        await client.connect();
         const movieCollection = client.db('movieDB').collection('movie');
 
 
@@ -40,7 +41,7 @@ async function run() {
         });
 
 
-        app.post('/add-movie', async (req, res) => {
+        app.post('/movie', async (req, res) => {
             const newMovie = req.body;
             console.log('Adding movie:', newMovie);
             const result = await movieCollection.insertOne(newMovie);
