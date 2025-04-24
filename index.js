@@ -1,4 +1,3 @@
-import cors from 'cors';
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -6,24 +5,21 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const port = process.env.PORT || 5000;
 
-
-//middleware;
+// Middleware
 const corsOptions = {
     origin: ["http://localhost:5173", "https://movie-portal-f7f50.web.app"],
     credentials: true,
-    operationSuccessStatus: 200,
+    optionsSuccessStatus: 200, // fixed typo from "operationSuccessStatus"
 };
+
 const app = express();
 app.use(express.json());
 app.use(cors(corsOptions));
 
+// MongoDB connection URI
+const uri = ` mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uru7rsz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uru7rsz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-console.log(uri);
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -31,54 +27,47 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
-
 async function run() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
-        //await client.connect();
+        await client.connect();
 
         const movieCollection = client.db('movieDB').collection('movie');
+
 
         app.get('/movie', async (req, res) => {
             const cursor = movieCollection.find();
             const result = await cursor.toArray();
             res.send(result);
-        })
+        });
 
 
         app.post('/add-movie', async (req, res) => {
             const newMovie = req.body;
-            console.log(newMovie);
-
+            console.log('Adding movie:', newMovie);
             const result = await movieCollection.insertOne(newMovie);
             res.send(result);
-        })
+        });
+
 
         app.delete('/movie/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: new ObjectId(id) }
+            const query = { _id: new ObjectId(id) };
             const result = await movieCollection.deleteOne(query);
             res.send(result);
-        })
+        });
 
-
-        // Send a ping to confirm a successful connection
-        //await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } finally {
-        // Ensures that the client will close when you finish/error
-        //await client.close();
+        console.log("Connected to MongoDB successfully");
+    } catch (err) {
+        console.error("MongoDB connection error:", err);
     }
+
 }
 run().catch(console.dir);
-
-
 
 
 app.get('/', (req, res) => {
     res.send('Movie portal server is running');
 });
-
 
 app.listen(port, () => {
     console.log(`Movie portal is running on port: ${port}`);
